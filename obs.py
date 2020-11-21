@@ -1,8 +1,7 @@
-from secrets import Secrets as secrets
-
 import asyncio
 import signal
 from json import loads
+from secrets import Secrets as secrets
 
 from gmqtt import Client as MQTTClient
 from obswebsocket import obsws
@@ -62,21 +61,21 @@ async def treatbot_cam(value):
     else:
         treatbot_active = False
 
+
 def ask_exit(*args):
     STOP.set()
     obs_client.disconnect()
 
 
-async def main():
-    client = MQTTClient("client-id")
+async def main(client):
 
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.on_disconnect = on_disconnect
-    client.on_subscribe = on_subscribe
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
+    mqtt_client.on_disconnect = on_disconnect
+    mqtt_client.on_subscribe = on_subscribe
 
-    client.set_auth_credentials(secrets.aio_user, secrets.aio_key)
-    await client.connect("io.adafruit.com", 8883, ssl=True)
+    mqtt_client.set_auth_credentials(secrets.aio_user, secrets.aio_key)
+    await mqtt_client.connect("io.adafruit.com", 8883, ssl=True)
 
     await STOP.wait()
     await client.disconnect()
@@ -92,4 +91,6 @@ if __name__ == "__main__":
     loop.add_signal_handler(signal.SIGINT, ask_exit)
     loop.add_signal_handler(signal.SIGTERM, ask_exit)
 
-    loop.run_until_complete(main())
+    mqtt_client = MQTTClient("client-id")
+
+    loop.run_until_complete(main(mqtt_client))
