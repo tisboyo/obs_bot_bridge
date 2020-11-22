@@ -55,7 +55,7 @@ async def treatbot_cam(value):
     enabled = bool(int(value))
     global treatbot_active
 
-    obs_client.call(requests.SetSceneItemRender("TreatBot", enabled, "Common"))
+    obs_client.call(requests.SetSceneItemRender(enabled, "TreatBot", "Common"))
 
     if enabled:
         treatbot_active = True
@@ -64,7 +64,7 @@ async def treatbot_cam(value):
             print(
                 "Hrm.... the treatbot didn't disable the OBS display. Disabling it..."
             )
-            obs_client.call(requests.SetSceneItemRender("TreatBot", False, "Common"))
+            obs_client.call(requests.SetSceneItemRender(False, "TreatBot", "Common"))
     else:
         treatbot_active = False
 
@@ -79,13 +79,13 @@ async def yay(value):
             yay_active = True
 
             # Turn on the Yay source
-            obs_client.call(requests.SetSceneItemRender("Yay", True, "Common"))
+            obs_client.call(requests.SetSceneItemRender(True, "Yay", "Common"))
 
             # Let it play
             await asyncio.sleep(1)
 
             # Turn it back off
-            obs_client.call(requests.SetSceneItemRender("Yay", False, "Common"))
+            obs_client.call(requests.SetSceneItemRender(False, "Yay", "Common"))
 
             # Reset the toggle - Has no effect on the bot, but shows correctly in the dashboard
             mqtt_client.publish(f"{secrets.aio_user}/f/yay-toggle", "0")
