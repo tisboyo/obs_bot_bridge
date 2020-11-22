@@ -82,13 +82,17 @@ async def yay(value):
             obs_client.call(requests.SetSceneItemRender(True, "Yay", "Common"))
 
             # Let it play
-            await asyncio.sleep(1)
+            await asyncio.sleep(5)
 
             # Turn it back off
             obs_client.call(requests.SetSceneItemRender(False, "Yay", "Common"))
 
             # Reset the toggle - Has no effect on the bot, but shows correctly in the dashboard
             mqtt_client.publish(f"{secrets.aio_user}/f/yay-toggle", "0")
+
+            # Sleep for 45 seconds to prevent continuious abuse
+            await asyncio.sleep(45)
+
             yay_active = False
 
 
