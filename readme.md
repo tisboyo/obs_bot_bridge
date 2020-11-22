@@ -23,6 +23,7 @@ In OBS, Tools->WebSockets Server Settings
 - Copy secrets.py.template to secrets.py
 - Set each value according to your settings, obs_ip is the address of your streaming system.
 - aio_user and aio_key are AdafruitIO username and key, enter those.
+- Sources is for the treatbot and yay Sources
 
 ## Setup environment
 - Install pipenv if not already installed
