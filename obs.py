@@ -1,8 +1,8 @@
 import asyncio
-from time import sleep
 import signal
 from json import loads
 from secrets import Secrets as secrets
+from time import sleep
 
 from gmqtt import Client as MQTTClient
 from obswebsocket import obsws
@@ -20,7 +20,6 @@ def get_obs_client():
         except ConnectionFailure:
             print("OBS Connection Failure... sleeping 5 seconds.")
             sleep(5)
-
 
 
 def on_connect(client, flags, rc, properties):
@@ -70,6 +69,29 @@ async def treatbot_cam(value):
         treatbot_active = False
 
 
+async def yay(value):
+    enable = bool(int(value))
+    global yay_active
+
+    if enable:
+        if not yay_active:
+            # Don't let it run again while already active
+            yay_active = True
+
+            # Turn on the Yay source
+            obs_client.call(requests.SetSceneItemRender("Yay", True, "Common"))
+
+            # Let it play
+            await asyncio.sleep(1)
+
+            # Turn it back off
+            obs_client.call(requests.SetSceneItemRender("Yay", False, "Common"))
+
+            # Reset the toggle - Has no effect on the bot, but shows correctly in the dashboard
+            mqtt_client.publish(f"{secrets.aio_user}/f/yay-toggle", "0")
+            yay_active = False
+
+
 def ask_exit(*args):
     STOP.set()
     obs_client.disconnect()
@@ -92,11 +114,14 @@ async def main(client):
 if __name__ == "__main__":
     feeds = {
         "dispense-treat-toggle": treatbot_cam,
+        "yay-toggle": yay,
     }
 
     STOP = asyncio.Event()
 
     treatbot_active = False  # Used for automatic timeout of the treatbot camera source
+    yay_active = False  # Used to keep the script from running a second time while the display is active
+
     loop = asyncio.get_event_loop()
 
     loop.add_signal_handler(signal.SIGINT, ask_exit)
