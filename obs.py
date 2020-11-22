@@ -1,4 +1,5 @@
 import asyncio
+from time import sleep
 import signal
 from json import loads
 from secrets import Secrets as secrets
@@ -6,13 +7,20 @@ from secrets import Secrets as secrets
 from gmqtt import Client as MQTTClient
 from obswebsocket import obsws
 from obswebsocket import requests
+from obswebsocket.exceptions import ConnectionFailure
 
-obs_client = obsws(secrets.obs_ip, secrets.obs_ws_port, secrets.obs_secret)
-obs_client.connect()
 
-STOP = asyncio.Event()
+def get_obs_client():
+    obs_client = obsws(secrets.obs_ip, secrets.obs_ws_port, secrets.obs_secret)
 
-treatbot_active = False  # Used for automatic timeout of the treatbot camera source
+    while True:
+        try:
+            obs_client.connect()
+            return obs_client
+        except ConnectionFailure:
+            print("OBS Connection Failure... sleeping 5 seconds.")
+            sleep(5)
+
 
 
 def on_connect(client, flags, rc, properties):
@@ -78,7 +86,7 @@ async def main(client):
     await mqtt_client.connect("io.adafruit.com", 8883, ssl=True)
 
     await STOP.wait()
-    await client.disconnect()
+    await mqtt_client.disconnect()
 
 
 if __name__ == "__main__":
@@ -86,11 +94,15 @@ if __name__ == "__main__":
         "dispense-treat-toggle": treatbot_cam,
     }
 
+    STOP = asyncio.Event()
+
+    treatbot_active = False  # Used for automatic timeout of the treatbot camera source
     loop = asyncio.get_event_loop()
 
     loop.add_signal_handler(signal.SIGINT, ask_exit)
     loop.add_signal_handler(signal.SIGTERM, ask_exit)
 
+    obs_client = get_obs_client()
     mqtt_client = MQTTClient("client-id")
 
     loop.run_until_complete(main(mqtt_client))
