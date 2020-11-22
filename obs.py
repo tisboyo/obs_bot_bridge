@@ -55,7 +55,10 @@ async def treatbot_cam(value):
     enabled = bool(int(value))
     global treatbot_active
 
-    obs_client.call(requests.SetSceneItemRender(enabled, "TreatBot", "Common"))
+    source_name = "Scene Main from NDI Treat Bot"
+    scene_name = "Scene: Common Elements - Streamlabs Alerts"
+
+    obs_client.call(requests.SetSceneItemRender(enabled, source_name, scene_name))
 
     if enabled:
         treatbot_active = True
@@ -64,7 +67,7 @@ async def treatbot_cam(value):
             print(
                 "Hrm.... the treatbot didn't disable the OBS display. Disabling it..."
             )
-            obs_client.call(requests.SetSceneItemRender(False, "TreatBot", "Common"))
+            obs_client.call(requests.SetSceneItemRender(False, source_name, scene_name))
     else:
         treatbot_active = False
 
@@ -73,19 +76,22 @@ async def yay(value):
     enable = bool(int(value))
     global yay_active
 
+    source_name = "Much Rejoicing v1"
+    scene_name = "Scene: Common Elements - Streamlabs Alerts"
+
     if enable:
         if not yay_active:
             # Don't let it run again while already active
             yay_active = True
 
             # Turn on the Yay source
-            obs_client.call(requests.SetSceneItemRender(True, "Yay", "Common"))
+            obs_client.call(requests.SetSceneItemRender(True, source_name, scene_name))
 
             # Let it play
             await asyncio.sleep(5)
 
             # Turn it back off
-            obs_client.call(requests.SetSceneItemRender(False, "Yay", "Common"))
+            obs_client.call(requests.SetSceneItemRender(False, source_name, scene_name))
 
             # Reset the toggle - Has no effect on the bot, but shows correctly in the dashboard
             mqtt_client.publish(f"{secrets.aio_user}/f/yay-toggle", "0")
