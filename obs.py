@@ -2,6 +2,7 @@ import asyncio
 import signal
 from json import loads
 from secrets import Secrets as secrets
+from secrets import Sources
 from time import sleep
 
 from gmqtt import Client as MQTTClient
@@ -55,8 +56,8 @@ async def treatbot_cam(value):
     enabled = bool(int(value))
     global treatbot_active
 
-    source_name = "Scene Main from NDI Treat Bot"
-    scene_name = "Scene: Common Elements - Streamlabs Alerts"
+    source_name = Sources.treatbot_cam_source
+    scene_name = Sources.treatbot_cam_scene
 
     obs_client.call(requests.SetSceneItemRender(enabled, source_name, scene_name))
 
@@ -76,8 +77,8 @@ async def yay(value):
     enable = bool(int(value))
     global yay_active
 
-    source_name = "Much Rejoicing v1"
-    scene_name = "Scene: Common Elements - Streamlabs Alerts"
+    source_name = Sources.yay_source
+    scene_name = Sources.yay_scene
 
     if enable:
         if not yay_active:
