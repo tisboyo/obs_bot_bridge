@@ -103,6 +103,23 @@ async def yay(value):
             yay_active = False
 
 
+async def follow(follower):
+    source = "NewFollowScene"
+    text_box = "Follower"
+    scene = "Common"
+    step = 40
+
+    # Turn the source off, just in case it was left on.
+    obs_client.call(requests.SetSceneItemRender(False, source, scene_name=scene))
+
+    # Set the follower text
+    obs_client.call(requests.SetTextFreetype2Properties(text_box, text=follower))
+
+    await slide_in_from_right(source, scene, step, -1)
+
+    # Turn the source back off
+    obs_client.call(requests.SetSceneItemRender(False, source, scene_name=scene))
+
 
 async def slide_in_from_right(source: str, scene: str, step: int, height: int):
     """Slides a OBS Source in from the right side of the display
@@ -256,6 +273,7 @@ if __name__ == "__main__":
     feeds = {
         "dispense-treat-toggle": treatbot_cam,
         "yay-toggle": yay,
+        # "follow": follow,
     }
 
     STOP = asyncio.Event()
