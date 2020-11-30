@@ -103,6 +103,136 @@ async def yay(value):
             yay_active = False
 
 
+
+async def slide_in_from_right(source: str, scene: str, step: int, height: int):
+    """Slides a OBS Source in from the right side of the display
+
+    Args:
+        source (str): Source Name
+        scene (str): Scene Name
+        step (int): How many steps per iteration to move in
+        height (int): Height from the top down, -1 will set it at the bottom.
+    """
+
+    # Grab screen output values
+    screen_properties = obs_client.call(requests.GetVideoInfo()).datain
+
+    # Values of the source
+    item_properties = obs_client.call(
+        requests.GetSceneItemProperties(source, scene_name=scene)
+    ).datain
+
+    # Set Starting position to bottom if -1
+    if height == -1:
+        height = int(screen_properties["baseHeight"] - item_properties["height"]) - 10
+
+    # Send the height, and set off right side of screen
+    obs_client.call(
+        requests.SetSceneItemPosition(
+            source,
+            height,
+            screen_properties["baseWidth"] + 1,
+        )
+    )
+
+    # Save how far in to slide
+    slide_in_to_x = int(screen_properties["baseWidth"] - item_properties["width"])
+
+    # Turn on the scene
+    obs_client.call(requests.SetSceneItemRender(True, source, scene_name=scene))
+
+    # Slide In
+    r_from = int(screen_properties["baseWidth"])
+    for x in range(r_from, slide_in_to_x, step * -1):
+        obs_client.call(
+            requests.SetSceneItemPosition(source, height, x, scene_name=scene)
+        )
+
+    # Move to width of item
+    obs_client.call(
+        requests.SetSceneItemPosition(
+            source,
+            height,
+            slide_in_to_x,
+        )
+    )
+
+    # Hold the position for a beat
+    await asyncio.sleep(2)
+
+    # Slide back out
+    for x in range(
+        slide_in_to_x,
+        int(screen_properties["baseWidth"]) + 2,
+        step * 2,
+    ):
+        obs_client.call(
+            requests.SetSceneItemPosition(source, height, x, scene_name=scene)
+        )
+
+
+async def slide_in_from_left(source: str, scene: str, step: int, height: int):
+    """Slides a OBS Source in from the left side of the display
+
+    Args:
+        source (str): Source Name
+        scene (str): Scene Name
+        step (int): How many steps per iteration to move in
+        height (int): Height from the top down, -1 will set it at the bottom.
+    """
+
+    # Grab screen output values
+    screen_properties = obs_client.call(requests.GetVideoInfo()).datain
+
+    # Values of the source
+    item_properties = obs_client.call(
+        requests.GetSceneItemProperties(source, scene_name=scene)
+    ).datain
+
+    # Set Starting position to bottom if -1
+    if height == -1:
+        height = int(screen_properties["baseHeight"] - item_properties["height"]) - 10
+
+    # Send the height, and set off left side of screen
+    width = (item_properties["width"] * -1) - 1
+    obs_client.call(requests.SetSceneItemPosition(source, height, width))
+
+    # Save how far in to slide
+    slide_in_to_x = 1  # Left edge sliding in to left edge of screen
+
+    # Turn on the scene
+    obs_client.call(requests.SetSceneItemRender(True, source, scene_name=scene))
+
+    # Slide In
+    r_from = -1 - int(item_properties["width"])
+    for width in range(r_from, slide_in_to_x, step):
+        obs_client.call(
+            requests.SetSceneItemPosition(source, height, width, scene_name=scene)
+        )
+
+    # Move to width of item
+    obs_client.call(
+        requests.SetSceneItemPosition(
+            source,
+            height,
+            slide_in_to_x,
+        )
+    )
+
+    # Hold the position for a beat
+    await asyncio.sleep(2)
+
+    # Slide back out
+    for width in range(
+        slide_in_to_x,
+        r_from,
+        step * -2,
+    ):
+        obs_client.call(
+            requests.SetSceneItemPosition(source, height, width, scene_name=scene)
+        )
+
+
 def ask_exit(*args):
     STOP.set()
     obs_client.disconnect()
