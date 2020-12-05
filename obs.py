@@ -2,6 +2,7 @@ import asyncio
 import signal
 from json import loads
 from secrets import Secrets as secrets
+from secrets import Settings
 from secrets import Sources
 from time import sleep
 
@@ -63,7 +64,7 @@ async def treatbot_cam(value):
 
     if enabled:
         treatbot_active = True
-        await asyncio.sleep(17)
+        await asyncio.sleep(Settings.treatbot_timeout)
         if treatbot_active:
             print(
                 "Hrm.... the treatbot didn't disable the OBS display. Disabling it..."
