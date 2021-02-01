@@ -1,6 +1,5 @@
 import asyncio
 import signal
-from json import loads
 from secrets import Secrets as secrets
 from secrets import Settings
 from secrets import Sources
@@ -27,21 +26,15 @@ def get_obs_client():
 def on_connect(client, flags, rc, properties):
     print("Connected")
     for feed in feeds.keys():
-        client.subscribe(f"{secrets.aio_user}/feeds/{feed}/json")
+        client.subscribe(feed)
 
 
 async def on_message(client, topic, payload, qos, properties):
 
-    # For some reason when the on_message is an asynchronous function it sends both
-    # the topic and the topic/json and we only want the topic/json
-    is_it_json = True if topic.split("/")[-1] == "json" else False
+    print(f"RECV MSG: {topic=}, {payload=}")
 
-    if is_it_json:
-        payload_json = loads(payload)
-        print(f"RECV MSG: {payload_json['key']=}, {payload_json['last_value']=}")
-
-        # Call the function for that specific feed
-        await feeds[payload_json["key"]](payload_json["last_value"])
+    # Call the function for that specific feed
+    await feeds[topic](payload.decode("utf8"))
 
 
 def on_disconnect(client, packet, exc=None):
@@ -95,8 +88,8 @@ async def yay(value):
             # Turn it back off
             obs_client.call(requests.SetSceneItemRender(False, source_name, scene_name))
 
-            # Reset the toggle - Has no effect on the bot, but shows correctly in the dashboard
-            mqtt_client.publish(f"{secrets.aio_user}/f/yay-toggle", "0")
+            # Reset the toggle - Has no effect on the bot, but shows correctly in the server
+            mqtt_client.publish("stream/yay-toggle", "0")
 
             # Sleep for 45 seconds to prevent continuious abuse
             await asyncio.sleep(45)
@@ -263,8 +256,8 @@ async def main(client):
     mqtt_client.on_disconnect = on_disconnect
     mqtt_client.on_subscribe = on_subscribe
 
-    mqtt_client.set_auth_credentials(secrets.aio_user, secrets.aio_key)
-    await mqtt_client.connect("io.adafruit.com", 8883, ssl=True)
+    mqtt_client.set_auth_credentials(secrets.mqtt_user, secrets.mqtt_key)
+    await mqtt_client.connect(secrets.mqtt_server, secrets.mqtt_port, ssl=True)
 
     await STOP.wait()
     await mqtt_client.disconnect()
@@ -272,8 +265,8 @@ async def main(client):
 
 if __name__ == "__main__":
     feeds = {
-        "dispense-treat-toggle": treatbot_cam,
-        "yay-toggle": yay,
+        "stream/dispense-treat-toggle": treatbot_cam,
+        "stream/yay-toggle": yay,
         # "follow": follow,
     }
 
