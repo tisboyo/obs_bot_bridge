@@ -31,7 +31,7 @@ def on_connect(client, flags, rc, properties):
 
 async def on_message(client, topic, payload, qos, properties):
 
-    print(f"RECV MSG: {topic=}, {payload=}")
+    print(f"RECV MSG: topic={topic}, payload={payload}")
 
     # Call the function for that specific feed
     await feeds[topic](payload.decode("utf8"))
@@ -43,7 +43,7 @@ def on_disconnect(client, packet, exc=None):
 
 def on_subscribe(client, mid, qos, properties):
     for sub in client.subscriptions:
-        print(f"SUBSCRIBED {sub.topic}, {sub.acknowledged=}")
+        print(f"SUBSCRIBED {sub.topic}, sub.acknowledged={sub.acknowledged}")
 
 
 async def treatbot_cam(value):
@@ -140,9 +140,7 @@ async def slide_in_from_right(source: str, scene: str, step: int, height: int):
     # Send the height, and set off right side of screen
     obs_client.call(
         requests.SetSceneItemPosition(
-            source,
-            height,
-            screen_properties["baseWidth"] + 1,
+            source, height, screen_properties["baseWidth"] + 1,
         )
     )
 
@@ -160,23 +158,13 @@ async def slide_in_from_right(source: str, scene: str, step: int, height: int):
         )
 
     # Move to width of item
-    obs_client.call(
-        requests.SetSceneItemPosition(
-            source,
-            height,
-            slide_in_to_x,
-        )
-    )
+    obs_client.call(requests.SetSceneItemPosition(source, height, slide_in_to_x,))
 
     # Hold the position for a beat
     await asyncio.sleep(2)
 
     # Slide back out
-    for x in range(
-        slide_in_to_x,
-        int(screen_properties["baseWidth"]) + 2,
-        step * 2,
-    ):
+    for x in range(slide_in_to_x, int(screen_properties["baseWidth"]) + 2, step * 2,):
         obs_client.call(
             requests.SetSceneItemPosition(source, height, x, scene_name=scene)
         )
@@ -222,23 +210,13 @@ async def slide_in_from_left(source: str, scene: str, step: int, height: int):
         )
 
     # Move to width of item
-    obs_client.call(
-        requests.SetSceneItemPosition(
-            source,
-            height,
-            slide_in_to_x,
-        )
-    )
+    obs_client.call(requests.SetSceneItemPosition(source, height, slide_in_to_x,))
 
     # Hold the position for a beat
     await asyncio.sleep(2)
 
     # Slide back out
-    for width in range(
-        slide_in_to_x,
-        r_from,
-        step * -2,
-    ):
+    for width in range(slide_in_to_x, r_from, step * -2,):
         obs_client.call(
             requests.SetSceneItemPosition(source, height, width, scene_name=scene)
         )

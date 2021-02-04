@@ -8,8 +8,8 @@ pre-commit="*"
 flake8="*"
 
 [packages]
-obs-websocket-py = {ref = "a352443691def00bff32cbea6e068c31b5a744c2", git = "https://github.com/SLiX69/obs-websocket-py.git"}
+obs-websocket-py = "*"
 gmqtt = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.7"
