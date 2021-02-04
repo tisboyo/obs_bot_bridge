@@ -253,12 +253,12 @@ if __name__ == "__main__":
     treatbot_active = False  # Used for automatic timeout of the treatbot camera source
     yay_active = False  # Used to keep the script from running a second time while the display is active
 
-    loop = asyncio.get_event_loop()
-
-    loop.add_signal_handler(signal.SIGINT, ask_exit)
-    loop.add_signal_handler(signal.SIGTERM, ask_exit)
-
     obs_client = get_obs_client()
     mqtt_client = MQTTClient("client-id")
+
+    loop = asyncio.get_event_loop()
+
+    for signame in ("SIGINT", "SIGTERM"):
+        loop.add_signal_handler(getattr(signal, signame), ask_exit(signame))
 
     loop.run_until_complete(main(mqtt_client))
