@@ -59,9 +59,7 @@ async def treatbot_cam(value):
         treatbot_active = True
         await asyncio.sleep(Settings.treatbot_timeout)
         if treatbot_active:
-            print(
-                "Hrm.... the treatbot didn't disable the OBS display. Disabling it..."
-            )
+            print("Hrm.... the treatbot didn't disable the OBS display. Disabling it...")
             obs_client.call(requests.SetSceneItemRender(False, source_name, scene_name))
     else:
         treatbot_active = False
@@ -129,9 +127,7 @@ async def slide_in_from_right(source: str, scene: str, step: int, height: int):
     screen_properties = obs_client.call(requests.GetVideoInfo()).datain
 
     # Values of the source
-    item_properties = obs_client.call(
-        requests.GetSceneItemProperties(source, scene_name=scene)
-    ).datain
+    item_properties = obs_client.call(requests.GetSceneItemProperties(source, scene_name=scene)).datain
 
     # Set Starting position to bottom if -1
     if height == -1:
@@ -140,7 +136,9 @@ async def slide_in_from_right(source: str, scene: str, step: int, height: int):
     # Send the height, and set off right side of screen
     obs_client.call(
         requests.SetSceneItemPosition(
-            source, height, screen_properties["baseWidth"] + 1,
+            source,
+            height,
+            screen_properties["baseWidth"] + 1,
         )
     )
 
@@ -153,21 +151,27 @@ async def slide_in_from_right(source: str, scene: str, step: int, height: int):
     # Slide In
     r_from = int(screen_properties["baseWidth"])
     for x in range(r_from, slide_in_to_x, step * -1):
-        obs_client.call(
-            requests.SetSceneItemPosition(source, height, x, scene_name=scene)
-        )
+        obs_client.call(requests.SetSceneItemPosition(source, height, x, scene_name=scene))
 
     # Move to width of item
-    obs_client.call(requests.SetSceneItemPosition(source, height, slide_in_to_x,))
+    obs_client.call(
+        requests.SetSceneItemPosition(
+            source,
+            height,
+            slide_in_to_x,
+        )
+    )
 
     # Hold the position for a beat
     await asyncio.sleep(2)
 
     # Slide back out
-    for x in range(slide_in_to_x, int(screen_properties["baseWidth"]) + 2, step * 2,):
-        obs_client.call(
-            requests.SetSceneItemPosition(source, height, x, scene_name=scene)
-        )
+    for x in range(
+        slide_in_to_x,
+        int(screen_properties["baseWidth"]) + 2,
+        step * 2,
+    ):
+        obs_client.call(requests.SetSceneItemPosition(source, height, x, scene_name=scene))
 
 
 async def slide_in_from_left(source: str, scene: str, step: int, height: int):
@@ -184,9 +188,7 @@ async def slide_in_from_left(source: str, scene: str, step: int, height: int):
     screen_properties = obs_client.call(requests.GetVideoInfo()).datain
 
     # Values of the source
-    item_properties = obs_client.call(
-        requests.GetSceneItemProperties(source, scene_name=scene)
-    ).datain
+    item_properties = obs_client.call(requests.GetSceneItemProperties(source, scene_name=scene)).datain
 
     # Set Starting position to bottom if -1
     if height == -1:
@@ -205,21 +207,27 @@ async def slide_in_from_left(source: str, scene: str, step: int, height: int):
     # Slide In
     r_from = -1 - int(item_properties["width"])
     for width in range(r_from, slide_in_to_x, step):
-        obs_client.call(
-            requests.SetSceneItemPosition(source, height, width, scene_name=scene)
-        )
+        obs_client.call(requests.SetSceneItemPosition(source, height, width, scene_name=scene))
 
     # Move to width of item
-    obs_client.call(requests.SetSceneItemPosition(source, height, slide_in_to_x,))
+    obs_client.call(
+        requests.SetSceneItemPosition(
+            source,
+            height,
+            slide_in_to_x,
+        )
+    )
 
     # Hold the position for a beat
     await asyncio.sleep(2)
 
     # Slide back out
-    for width in range(slide_in_to_x, r_from, step * -2,):
-        obs_client.call(
-            requests.SetSceneItemPosition(source, height, width, scene_name=scene)
-        )
+    for width in range(
+        slide_in_to_x,
+        r_from,
+        step * -2,
+    ):
+        obs_client.call(requests.SetSceneItemPosition(source, height, width, scene_name=scene))
 
 
 def ask_exit(*args):
@@ -243,8 +251,8 @@ async def main(client):
 
 if __name__ == "__main__":
     feeds = {
-        "stream/dispense-treat-toggle": treatbot_cam,
-        "stream/yay-toggle": yay,
+        "stream/dispense-treat-toggle": None,
+        "stream/yay-toggle": None,
         # "follow": follow,
     }
 
