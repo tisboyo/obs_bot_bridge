@@ -266,7 +266,7 @@ if __name__ == "__main__":
 
     loop = asyncio.get_event_loop()
 
-    for signame in ("SIGINT", "SIGTERM"):
-        loop.add_signal_handler(getattr(signal, signame), ask_exit(signame))
+    loop.add_signal_handler(signal.SIGINT, ask_exit)
+    loop.add_signal_handler(signal.SIGTERM, ask_exit)
 
     loop.run_until_complete(main(mqtt_client))
