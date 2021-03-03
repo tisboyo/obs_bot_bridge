@@ -251,8 +251,8 @@ async def main(client):
 
 if __name__ == "__main__":
     feeds = {
-        "stream/dispense-treat-toggle": None,
-        "stream/yay-toggle": None,
+        "stream/dispense-treat-toggle": treatbot_cam,
+        "stream/yay-toggle": yay,
         # "follow": follow,
     }
 
